@@ -1,0 +1,490 @@
+:root {
+  --color-bg: #f3f5f7;
+  --color-card-bg: #ffffff;
+  --color-border: #e1e6ea;
+  --color-text: #22303f;
+  --color-text-muted: #62707d;
+  --color-accent: #2b6cb0;
+  --color-accent-dark: #1a365d;
+  --color-accent-bg: #eaf1f8;
+  --color-success: #2f855a;
+  --color-success-bg: #eefaf3;
+  --color-danger: #c0392b;
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --radius-sm: 4px;
+  --shadow-card: 0 1px 3px rgba(20, 30, 40, 0.07), 0 1px 2px rgba(20, 30, 40, 0.04);
+
+  font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, system-ui,
+    -apple-system, sans-serif;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+}
+
+/* ---------- 全体進捗 ---------- */
+
+.overall-progress {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 20px 20px 22px;
+  margin-bottom: 20px;
+}
+
+.overall-progress h1 {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-accent-dark);
+  line-height: 1.5;
+}
+
+.overall-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-bottom: 16px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 100px;
+}
+
+.stat-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-accent-dark);
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+/* ---------- 進捗バー（共通） ---------- */
+
+.segmented-bar {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+
+.segment {
+  flex: 1;
+  height: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-border);
+  transition: background-color 0.2s ease;
+}
+
+.segment.filled {
+  background: var(--color-accent);
+}
+
+.segment-button {
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  height: 22px;
+}
+
+.segment-button:hover {
+  background: #c9d5df;
+}
+
+.segment-button.filled:hover {
+  background: var(--color-accent-dark);
+}
+
+.segment-button:focus-visible {
+  outline: 2px solid var(--color-accent-dark);
+  outline-offset: 2px;
+}
+
+/* ---------- タスクカード ---------- */
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.task-card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.task-card.is-complete {
+  background: var(--color-success-bg);
+  border-color: var(--color-success);
+}
+
+.task-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.task-number {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.complete-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--color-success);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.task-title {
+  margin: 0 0 12px;
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.task-stage-row {
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.task-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.btn {
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: #ffffff;
+  flex: 1;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-accent-dark);
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  flex: 1;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-accent-bg);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-accent-dark);
+  outline-offset: 2px;
+}
+
+.completion-message {
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  animation: fade-in 0.35s ease;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- 作業時間の入力 ---------- */
+
+.time-entry {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.time-entry label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.time-entry input {
+  width: 72px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-align: right;
+  font-size: 0.92rem;
+}
+
+.time-entry input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.time-entry-unit {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.btn-outline {
+  background: #ffffff;
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  min-height: 40px;
+  padding: 8px 16px;
+}
+
+.btn-outline:hover {
+  background: var(--color-accent-bg);
+}
+
+.error-message {
+  margin: 8px 0 0;
+  color: var(--color-danger);
+  font-size: 0.82rem;
+}
+
+.time-message {
+  margin: 8px 0 0;
+  color: var(--color-accent-dark);
+  font-size: 0.82rem;
+  animation: fade-in 0.3s ease;
+}
+
+/* ---------- 段階別の作業時間 ---------- */
+
+.stage-time-summary {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--color-border);
+}
+
+.stage-time-summary h3 {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.stage-time-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.stage-time-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.stage-time-item.current {
+  background: var(--color-accent-bg);
+  color: var(--color-accent-dark);
+  font-weight: 700;
+}
+
+.task-total-time {
+  margin: 10px 0 0;
+  text-align: right;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* ---------- リセット ---------- */
+
+/* ---------- 端末間の同期 ---------- */
+
+.sync-settings {
+  margin-top: 24px;
+}
+
+.sync-toggle {
+  width: 100%;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-align: left;
+}
+
+.sync-toggle:hover {
+  background: var(--color-accent-bg);
+}
+
+.sync-toggle:focus-visible {
+  outline: 2px solid var(--color-accent-dark);
+  outline-offset: 2px;
+}
+
+.sync-panel {
+  margin-top: 8px;
+  padding: 16px;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.sync-description {
+  margin: 0 0 12px;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.sync-description a {
+  color: var(--color-accent);
+}
+
+.sync-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sync-form input {
+  flex: 1;
+  min-width: 160px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+}
+
+.sync-form input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.sync-status-line {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.sync-gist-link {
+  margin: 0 0 12px;
+  font-size: 0.82rem;
+}
+
+.sync-gist-link a {
+  color: var(--color-accent);
+}
+
+.app-footer {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.btn-reset {
+  background: #ffffff;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  padding: 10px 26px;
+}
+
+.btn-reset:hover {
+  background: #fdf1f0;
+}
+
+/* ---------- レスポンシブ ---------- */
+
+@media (min-width: 600px) {
+  .app {
+    padding: 32px 24px 56px;
+  }
+
+  .stage-time-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .stage-time-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
