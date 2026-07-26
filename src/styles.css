@@ -47,6 +47,17 @@ input {
   max-width: 720px;
   margin: 0 auto;
   padding: 20px 16px 48px;
+  min-height: 100vh;
+  background: var(--color-bg);
+  transition: background-color 0.2s ease;
+}
+
+.app--task2 {
+  background: #e9f6ec; /* Task2: 薄い緑 */
+}
+
+.app--task3 {
+  background: #fbebf0; /* Task3: 薄いピンク */
 }
 
 /* ---------- タブ ---------- */

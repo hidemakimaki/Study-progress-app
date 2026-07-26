@@ -141,8 +141,11 @@ function App() {
 
   const sync = useGistSync<SyncBundle>({ data: syncBundle, onRemoteData: applyRemoteBundle });
 
+  const themeClass =
+    activeTab === 'task2' ? 'app--task2' : activeTab === 'task3' ? 'app--task3' : '';
+
   return (
-    <div className="app">
+    <div className={`app ${themeClass}`}>
       <TabNav labels={tabLabels} activeTab={activeTab} onSelect={setActiveTab} />
 
       {activeTab === 'task1' && (
