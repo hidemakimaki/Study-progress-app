@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { SyncStatus } from '../hooks/useGistSync';
 import { gistUrl } from '../sync/githubGist';
+import { isOAuthConfigured, redirectToGitHubLogin } from '../auth/githubOAuth';
 
 type SyncSettingsProps = {
   status: SyncStatus;
@@ -37,6 +38,8 @@ function SyncSettings({
 }: SyncSettingsProps) {
   const [open, setOpen] = useState(false);
   const [tokenInput, setTokenInput] = useState('');
+  const oauthAvailable = isOAuthConfigured();
+  const [showManualToken, setShowManualToken] = useState(!oauthAvailable);
   const isConnected = status !== 'disabled';
 
   const handleConnect = () => {
@@ -61,31 +64,54 @@ function SyncSettings({
           {!isConnected ? (
             <>
               <p className="sync-description">
-                GitHubの個人アクセストークン（gist権限のみ）を入力すると、進捗データをGitHub
-                Gistに保存し、他の端末（スマホなど）でも同じ進捗を見られるようになります。
-                <br />
-                トークンは
-                <a
-                  href="https://github.com/settings/tokens/new?scopes=gist&description=slide-progress-app"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  GitHubのトークン発行ページ
-                </a>
-                で「gist」権限のみを選んで発行してください。トークンはこの端末のブラウザ内にのみ保存されます。
+                進捗データをGitHub Gistに保存し、他の端末（スマホなど）でも同じ進捗を見られるようにします。
               </p>
-              <div className="sync-form">
-                <input
-                  type="password"
-                  value={tokenInput}
-                  onChange={(e) => setTokenInput(e.target.value)}
-                  placeholder="ghp_..."
-                  aria-label="GitHub個人アクセストークン"
-                />
-                <button type="button" className="btn btn-outline" onClick={handleConnect}>
-                  接続
+
+              {oauthAvailable && (
+                <button
+                  type="button"
+                  className="btn btn-primary sync-login-btn"
+                  onClick={redirectToGitHubLogin}
+                >
+                  GitHubでログイン
                 </button>
-              </div>
+              )}
+
+              {oauthAvailable && !showManualToken ? (
+                <button
+                  type="button"
+                  className="sync-manual-toggle"
+                  onClick={() => setShowManualToken(true)}
+                >
+                  または、トークンを直接入力（詳細）
+                </button>
+              ) : (
+                <>
+                  <p className="sync-description">
+                    トークンは
+                    <a
+                      href="https://github.com/settings/tokens/new?scopes=gist&description=slide-progress-app"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      GitHubのトークン発行ページ
+                    </a>
+                    で「gist」権限のみを選んで発行してください。トークンはこの端末のブラウザ内にのみ保存されます。
+                  </p>
+                  <div className="sync-form">
+                    <input
+                      type="password"
+                      value={tokenInput}
+                      onChange={(e) => setTokenInput(e.target.value)}
+                      placeholder="ghp_..."
+                      aria-label="GitHub個人アクセストークン"
+                    />
+                    <button type="button" className="btn btn-outline" onClick={handleConnect}>
+                      接続
+                    </button>
+                  </div>
+                </>
+              )}
             </>
           ) : (
             <>

@@ -455,6 +455,25 @@ input {
   color: var(--color-accent);
 }
 
+.sync-login-btn {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.sync-manual-toggle {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.sync-manual-toggle:hover {
+  color: var(--color-accent);
+}
+
 .app-footer {
   margin-top: 28px;
   text-align: center;

@@ -9,6 +9,7 @@ import {
   updateGist,
   GistSyncError,
 } from '../sync/githubGist';
+import { consumePendingOAuthCallback, exchangeCodeForToken, OAuthError } from '../auth/githubOAuth';
 
 export type SyncStatus = 'disabled' | 'idle' | 'syncing' | 'synced' | 'error';
 
@@ -80,8 +81,20 @@ export function useGistSync({ data, onRemoteData }: UseGistSyncOptions): UseGist
     }
   };
 
-  // 起動時、既にトークン・gistIdが保存されていれば一度同期する
+  // 起動時：GitHubログインからの戻りならトークンに交換して接続、
+  // なければ既存のトークン・gistIdがあれば一度同期する
   useEffect(() => {
+    const pending = consumePendingOAuthCallback();
+    if (pending) {
+      setStatus('syncing');
+      exchangeCodeForToken(pending.code)
+        .then((newToken) => connect(newToken))
+        .catch((err) => {
+          setStatus('error');
+          setErrorMessage(err instanceof OAuthError ? err.message : 'GitHubログインに失敗しました');
+        });
+      return;
+    }
     if (token && gistId) {
       pull(token, gistId);
     }

@@ -29,7 +29,7 @@ npm run build
 - すべてのデータをブラウザのlocalStorageに保存（再読み込み・再訪問後も保持）
 - 確認ダイアログ付きの全リセット機能
 - スマートフォン・パソコンの両方に対応したレスポンシブデザイン
-- （任意）GitHub Gistを使った端末間の進捗同期
+- （任意）GitHub Gistを使った端末間の進捗同期。Vercelにデプロイした場合は「GitHubでログイン」ボタンでの接続にも対応
 
 ## 技術構成
 
@@ -63,3 +63,27 @@ npm run build
 - データが変わってから1.5秒後に自動でGistへ保存し、起動時・「今すぐ同期」実行時にGistの内容と比較します
 - 競合解決は「更新日時が新しい方を採用する」単純な方式（last-write-wins）です。2台でほぼ同時に編集すると、後から同期した方の内容で上書きされることがあります
 - 「同期を解除」はその端末のトークン情報を消すだけで、Gist自体は削除されません
+
+## Vercelにデプロイして「GitHubでログイン」を使う（任意）
+
+トークンを手動でコピペする代わりに、ボタン一つでログインして同期したい場合はVercelへのデプロイが必要です
+（GitHubの認可コード→アクセストークン交換にサーバー側の処理が必須なため、`api/github-oauth-token.ts`という
+最小限のVercel Functionsを使っています）。GitHub Pages版はサーバーがないため、この場合も手動トークン入力の
+方式は変わらず使えます（両方が共存します）。
+
+### 1. GitHub OAuth Appを作成する
+
+1. https://github.com/settings/applications/new を開く
+2. Homepage URL・Authorization callback URL の両方に、Vercelでのデプロイ後の本番URL
+   （例: `https://slide-progress-app.vercel.app/`）を入力
+3. 作成すると **Client ID** と **Client Secret** が発行される
+
+### 2. Vercelにインポートしてデプロイする
+
+1. https://vercel.com/new で GitHub リポジトリ `slide-progress-app` をImport（Viteとして自動検出されます）
+2. Project Settings → Environment Variables に以下を設定
+   - `VITE_GITHUB_CLIENT_ID` … 1で発行されたClient ID（秘密情報ではありません）
+   - `GITHUB_CLIENT_SECRET` … 1で発行されたClient Secret（**Vercelの環境変数にのみ設定し、他には貼らない**）
+3. デプロイ後のURLが、1で登録したcallback URLと一致していることを確認する（違う場合はOAuth App側を更新）
+
+これで、そのVercel URLでアプリを開くと「他の端末と同期」に「GitHubでログイン」ボタンが表示されます。

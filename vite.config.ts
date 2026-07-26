@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/slide-progress-app/',
+  // VercelはルートでホストするがGitHub Pagesはサブパスになるため出し分ける
+  base: process.env.VERCEL ? '/' : '/slide-progress-app/',
   plugins: [react()],
 })
