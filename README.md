@@ -41,7 +41,7 @@ npm run build
 
 このリポジトリは公開（Public）リポジトリです。`main`ブランチにpushすると、
 `.github/workflows/deploy.yml`のGitHub Actionsが自動でビルドし、
-`https://<GitHubユーザー名>.github.io/slide-progress-app/` に公開されます。
+`https://<GitHubユーザー名>.github.io/Study-progress-app/` に公開されます。
 
 初回のみ、リポジトリの Settings → Pages → Source を「GitHub Actions」に設定してください。
 
@@ -75,12 +75,12 @@ npm run build
 
 1. https://github.com/settings/applications/new を開く
 2. Homepage URL・Authorization callback URL の両方に、Vercelでのデプロイ後の本番URL
-   （例: `https://slide-progress-app.vercel.app/`）を入力
+   （例: `https://my-study-progress-app.vercel.app/`）を入力
 3. 作成すると **Client ID** と **Client Secret** が発行される
 
 ### 2. Vercelにインポートしてデプロイする
 
-1. https://vercel.com/new で GitHub リポジトリ `slide-progress-app` をImport（Viteとして自動検出されます）
+1. https://vercel.com/new で GitHub リポジトリ `Study-progress-app` をImport（Viteとして自動検出されます）
 2. Project Settings → Environment Variables に以下を設定
    - `VITE_GITHUB_CLIENT_ID` … 1で発行されたClient ID（秘密情報ではありません）
    - `GITHUB_CLIENT_SECRET` … 1で発行されたClient Secret（**Vercelの環境変数にのみ設定し、他には貼らない**）
