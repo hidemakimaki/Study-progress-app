@@ -1,6 +1,7 @@
 import { useEffect, useState, type KeyboardEvent } from 'react';
+import type { CSSProperties } from 'react';
 import type { Task } from '../types';
-import { STAGE_LABELS, MAX_PROGRESS } from '../types';
+import { STAGE_LABELS, MAX_PROGRESS, TASK_COLORS } from '../types';
 import { formatMinutes, parseMinutesInput } from '../utils/time';
 import SegmentedBar from './SegmentedBar';
 
@@ -74,8 +75,21 @@ function TaskCard({ task, onAdvance, onRetreat, onSetProgress, onAddTime }: Task
     }
   };
 
+  const taskColor = TASK_COLORS[task.id];
+  const taskColorStyle = taskColor
+    ? ({
+        '--task-accent': taskColor.base,
+        '--task-accent-dark': taskColor.dark,
+        '--task-accent-bg': taskColor.bg,
+      } as CSSProperties)
+    : undefined;
+
   return (
-    <section className={`task-card ${isComplete ? 'is-complete' : ''}`} aria-label={task.title}>
+    <section
+      className={`task-card ${isComplete ? 'is-complete' : ''}`}
+      aria-label={task.title}
+      style={taskColorStyle}
+    >
       <div className="task-card-header">
         <span className="task-number">タスク{task.id}</span>
         {isComplete && <span className="complete-badge">完了</span>}

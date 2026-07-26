@@ -150,9 +150,53 @@ input {
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
+.task-card {
+  border-top: 3px solid var(--task-accent, var(--color-accent));
+}
+
 .task-card.is-complete {
   background: var(--color-success-bg);
   border-color: var(--color-success);
+}
+
+/* タスクごとのメインカラーをバー・ボタン・強調表示に反映 */
+
+.task-card .segment.filled {
+  background: var(--task-accent, var(--color-accent));
+}
+
+.task-card .segment-button.filled:hover {
+  background: var(--task-accent-dark, var(--color-accent-dark));
+}
+
+.task-card .segment-button:focus-visible {
+  outline-color: var(--task-accent-dark, var(--color-accent-dark));
+}
+
+.task-card .btn-primary {
+  background: var(--task-accent, var(--color-accent));
+}
+
+.task-card .btn-primary:hover:not(:disabled) {
+  background: var(--task-accent-dark, var(--color-accent-dark));
+}
+
+.task-card .btn-secondary {
+  color: var(--task-accent-dark, var(--color-accent));
+  border-color: var(--task-accent, var(--color-accent));
+}
+
+.task-card .btn-secondary:hover:not(:disabled) {
+  background: var(--task-accent-bg, var(--color-accent-bg));
+}
+
+.task-card .btn:focus-visible {
+  outline-color: var(--task-accent-dark, var(--color-accent-dark));
+}
+
+.task-card .stage-time-item.current {
+  background: var(--task-accent-bg, var(--color-accent-bg));
+  color: var(--task-accent-dark, var(--color-accent-dark));
 }
 
 .task-card-header {
