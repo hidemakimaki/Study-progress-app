@@ -1,4 +1,4 @@
-import type { AppData, Task, TabKey, TabLabels, TimeByStage } from '../types';
+import type { AppData, SyncBundle, Task, TabKey, TabLabels, TimeByStage } from '../types';
 import { TASK_TITLES, MAX_PROGRESS, DEFAULT_TAB_LABELS, MIN_STEPS, MAX_STEPS, DEFAULT_STEP_COUNT } from '../types';
 
 export function todayString(): string {
@@ -121,4 +121,66 @@ export function sanitizeStepTitles(raw: unknown, fallback: string[] = defaultSte
     return fallback;
   }
   return raw.map((v, i) => (typeof v === 'string' ? v : (fallback[i] ?? `ステップ${i + 1}`)));
+}
+
+/**
+ * Gistから取得した生データをSyncBundleへ組み立てる。Task1のみを同期していた
+ * 旧バージョン（tasks配列を直接持つAppData形式）で保存されたGistも検知して
+ * 自動的に移行する。
+ */
+export function normalizeSyncBundle(raw: unknown): SyncBundle {
+  const nowIso = new Date().toISOString();
+
+  if (typeof raw !== 'object' || raw === null) {
+    return {
+      tabLabels: DEFAULT_TAB_LABELS,
+      task1Titles: [...TASK_TITLES],
+      task2Titles: defaultStepTitles(),
+      task3Titles: defaultStepTitles(),
+      task1Data: createInitialData(TASK_TITLES),
+      task2Data: createInitialData(defaultStepTitles()),
+      task3Data: createInitialData(defaultStepTitles()),
+      settingsUpdatedAt: nowIso,
+      updatedAt: nowIso,
+    };
+  }
+
+  const obj = raw as Record<string, unknown>;
+
+  // 旧バージョン（Task1のみ同期・tasks配列を直接持つ形式）からの移行
+  if (Array.isArray(obj.tasks)) {
+    const legacyData = sanitizeAppData(obj, TASK_TITLES);
+    return {
+      tabLabels: DEFAULT_TAB_LABELS,
+      task1Titles: [...TASK_TITLES],
+      task2Titles: defaultStepTitles(),
+      task3Titles: defaultStepTitles(),
+      task1Data: legacyData,
+      task2Data: createInitialData(defaultStepTitles()),
+      task3Data: createInitialData(defaultStepTitles()),
+      settingsUpdatedAt: legacyData.updatedAt,
+      updatedAt: legacyData.updatedAt,
+    };
+  }
+
+  const task1Titles = sanitizeStepTitles(obj.task1Titles, [...TASK_TITLES]);
+  const task2Titles = sanitizeStepTitles(obj.task2Titles);
+  const task3Titles = sanitizeStepTitles(obj.task3Titles);
+
+  const updatedAt =
+    typeof obj.updatedAt === 'string' && !Number.isNaN(Date.parse(obj.updatedAt))
+      ? obj.updatedAt
+      : nowIso;
+
+  return {
+    tabLabels: sanitizeTabLabels(obj.tabLabels),
+    task1Titles,
+    task2Titles,
+    task3Titles,
+    task1Data: sanitizeAppData(obj.task1Data, task1Titles),
+    task2Data: sanitizeAppData(obj.task2Data, task2Titles),
+    task3Data: sanitizeAppData(obj.task3Data, task3Titles),
+    settingsUpdatedAt: typeof obj.settingsUpdatedAt === 'string' ? obj.settingsUpdatedAt : updatedAt,
+    updatedAt,
+  };
 }

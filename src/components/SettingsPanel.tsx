@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { TabLabels } from '../types';
 import { DEFAULT_TAB_LABELS } from '../types';
 import StepSettings from './StepSettings';
@@ -13,6 +14,7 @@ type SettingsPanelProps = {
   onTask2TitlesChange: (titles: string[]) => void;
   task3Titles: string[];
   onTask3TitlesChange: (titles: string[]) => void;
+  syncSlot?: ReactNode;
 };
 
 function SettingsPanel({
@@ -24,6 +26,7 @@ function SettingsPanel({
   onTask2TitlesChange,
   task3Titles,
   onTask3TitlesChange,
+  syncSlot,
 }: SettingsPanelProps) {
   const handleLabelChange = (index: number, value: string) => {
     const next = [...labels] as TabLabels;
@@ -33,6 +36,8 @@ function SettingsPanel({
 
   return (
     <div className="settings-page">
+      {syncSlot}
+
       <section className="settings-panel">
         <h2 className="settings-title">タブの名前を編集</h2>
         <p className="settings-description">

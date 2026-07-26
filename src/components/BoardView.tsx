@@ -18,7 +18,6 @@ type BoardViewProps = {
   onSetProgress: (taskId: number, stage: number) => boolean;
   onAddTime: (taskId: number, minutes: number) => void;
   onResetAll: () => void;
-  syncSlot?: ReactNode;
 };
 
 /** タスクボード（全体進捗＋タスクカード一覧）の共通表示。Task1/Task2/Task3で共用する。 */
@@ -32,7 +31,6 @@ function BoardView({
   onSetProgress,
   onAddTime,
   onResetAll,
-  syncSlot,
 }: BoardViewProps) {
   return (
     <>
@@ -57,8 +55,6 @@ function BoardView({
           />
         ))}
       </main>
-
-      {syncSlot}
 
       <footer className="app-footer">
         <button type="button" className="btn btn-reset" onClick={onResetAll}>

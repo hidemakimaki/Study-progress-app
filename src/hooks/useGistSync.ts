@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocalStorage } from './useLocalStorage';
-import type { AppData } from '../types';
 import { GIST_TOKEN_KEY, GIST_ID_KEY } from '../types';
 import {
   createGist,
@@ -13,9 +12,9 @@ import { consumePendingOAuthCallback, exchangeCodeForToken, OAuthError } from '.
 
 export type SyncStatus = 'disabled' | 'idle' | 'syncing' | 'synced' | 'error';
 
-type UseGistSyncOptions = {
-  data: AppData;
-  onRemoteData: (data: AppData) => void;
+type UseGistSyncOptions<T> = {
+  data: T;
+  onRemoteData: (data: T) => void;
 };
 
 type UseGistSyncResult = {
@@ -31,11 +30,14 @@ type UseGistSyncResult = {
 const DEBOUNCE_MS = 1500;
 
 /**
- * 進捗データ(AppData)をGitHub Gistへミラーし、端末間で同期する。
+ * 任意の同期データ(updatedAtを持つオブジェクト)をGitHub Gistへミラーし、端末間で同期する。
  * 競合はupdatedAtによるlast-write-winsで解決する（このアプリは1人で複数端末から
  * 使う前提のため、厳密なマージ機能は持たない）。
  */
-export function useGistSync({ data, onRemoteData }: UseGistSyncOptions): UseGistSyncResult {
+export function useGistSync<T extends { updatedAt: string }>({
+  data,
+  onRemoteData,
+}: UseGistSyncOptions<T>): UseGistSyncResult {
   const [token, setToken] = useLocalStorage<string>(GIST_TOKEN_KEY, '');
   const [gistId, setGistId] = useLocalStorage<string>(GIST_ID_KEY, '');
   const [status, setStatus] = useState<SyncStatus>(token && gistId ? 'idle' : 'disabled');
@@ -63,7 +65,7 @@ export function useGistSync({ data, onRemoteData }: UseGistSyncOptions): UseGist
   const pull = async (t: string, id: string) => {
     setStatus('syncing');
     try {
-      const remote = await fetchGistData(t, id);
+      const remote = await fetchGistData<T>(t, id);
       const remoteNewer =
         !!remote && Date.parse(remote.updatedAt) > Date.parse(dataRef.current.updatedAt);
       if (remote && remoteNewer) {

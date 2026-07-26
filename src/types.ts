@@ -69,3 +69,19 @@ export const TASK2_STORAGE_KEY = 'task2Data';
 export const TASK3_STORAGE_KEY = 'task3Data';
 export const TASK2_STEPS_KEY = 'task2StepTitles';
 export const TASK3_STEPS_KEY = 'task3StepTitles';
+
+// ---------- 同期（Task1〜Task3・設定をまとめて1つのGistに保存） ----------
+
+export type SyncBundle = {
+  tabLabels: TabLabels;
+  task1Titles: string[];
+  task2Titles: string[];
+  task3Titles: string[];
+  task1Data: AppData;
+  task2Data: AppData;
+  task3Data: AppData;
+  settingsUpdatedAt: string;
+  updatedAt: string; // Task1〜3・設定のうち最新の更新日時
+};
+
+export const SETTINGS_UPDATED_AT_KEY = 'settingsUpdatedAt';

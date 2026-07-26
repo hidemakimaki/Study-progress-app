@@ -1,4 +1,3 @@
-import type { AppData } from '../types';
 import { GIST_FILENAME } from '../types';
 
 const API_BASE = 'https://api.github.com';
@@ -30,12 +29,12 @@ export async function findExistingGist(token: string): Promise<string | null> {
   return found ? found.id : null;
 }
 
-export async function createGist(token: string, data: AppData): Promise<string> {
+export async function createGist<T>(token: string, data: T): Promise<string> {
   const response = await fetch(`${API_BASE}/gists`, {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify({
-      description: 'スライド作成進捗（同期用データ・自動生成）',
+      description: 'study-progress-app 同期用データ（Task1〜3・設定・自動生成）',
       public: false,
       files: {
         [GIST_FILENAME]: { content: JSON.stringify(data, null, 2) },
@@ -47,7 +46,7 @@ export async function createGist(token: string, data: AppData): Promise<string> 
   return created.id;
 }
 
-export async function fetchGistData(token: string, gistId: string): Promise<AppData | null> {
+export async function fetchGistData<T>(token: string, gistId: string): Promise<T | null> {
   const response = await fetch(`${API_BASE}/gists/${gistId}`, { headers: authHeaders(token) });
   if (response.status === 404) return null;
   await assertOk(response, 'Gistの取得');
@@ -55,13 +54,13 @@ export async function fetchGistData(token: string, gistId: string): Promise<AppD
   const file = gist.files[GIST_FILENAME];
   if (!file || !file.content) return null;
   try {
-    return JSON.parse(file.content) as AppData;
+    return JSON.parse(file.content) as T;
   } catch {
     return null;
   }
 }
 
-export async function updateGist(token: string, gistId: string, data: AppData): Promise<void> {
+export async function updateGist<T>(token: string, gistId: string, data: T): Promise<void> {
   const response = await fetch(`${API_BASE}/gists/${gistId}`, {
     method: 'PATCH',
     headers: authHeaders(token),

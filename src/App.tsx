@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useGistSync } from './hooks/useGistSync';
 import { useTaskBoard } from './hooks/useTaskBoard';
@@ -6,11 +7,13 @@ import {
   sanitizeTabLabels,
   sanitizeStepTitles,
   defaultStepTitles,
+  normalizeSyncBundle,
 } from './utils/data';
-import type { TabKey, TabLabels } from './types';
+import type { SyncBundle, TabKey, TabLabels } from './types';
 import {
   ACTIVE_TAB_KEY,
   DEFAULT_TAB_LABELS,
+  SETTINGS_UPDATED_AT_KEY,
   STORAGE_KEY,
   TAB_LABELS_KEY,
   TASK1_STEPS_KEY,
@@ -25,6 +28,12 @@ import SyncSettings from './components/SyncSettings';
 import TabNav from './components/TabNav';
 import SettingsPanel from './components/SettingsPanel';
 import './styles.css';
+
+const EPOCH = new Date(0).toISOString();
+
+function latestOf(timestamps: string[]): string {
+  return timestamps.reduce((latest, t) => (Date.parse(t) > Date.parse(latest) ? t : latest));
+}
 
 function App() {
   const [tabLabels, setTabLabels] = useLocalStorage<TabLabels>(
@@ -52,12 +61,85 @@ function App() {
     defaultStepTitles(),
     (raw) => sanitizeStepTitles(raw)
   );
+  const [settingsUpdatedAt, setSettingsUpdatedAt] = useLocalStorage<string>(
+    SETTINGS_UPDATED_AT_KEY,
+    EPOCH
+  );
 
   const board1 = useTaskBoard(STORAGE_KEY, task1Titles);
   const board2 = useTaskBoard(TASK2_STORAGE_KEY, task2Titles);
   const board3 = useTaskBoard(TASK3_STORAGE_KEY, task3Titles);
 
-  const sync = useGistSync({ data: board1.data, onRemoteData: board1.setData });
+  /** タブ名・ステップ設定を変更する際は、同期用のupdatedAtも一緒に打刻する */
+  function touchSettings() {
+    setSettingsUpdatedAt(new Date().toISOString());
+  }
+  function updateTabLabels(next: TabLabels) {
+    setTabLabels(next);
+    touchSettings();
+  }
+  function updateTask1Titles(next: string[]) {
+    setTask1Titles(next);
+    touchSettings();
+  }
+  function updateTask2Titles(next: string[]) {
+    setTask2Titles(next);
+    touchSettings();
+  }
+  function updateTask3Titles(next: string[]) {
+    setTask3Titles(next);
+    touchSettings();
+  }
+
+  const bundleUpdatedAt = useMemo(
+    () =>
+      latestOf([
+        settingsUpdatedAt,
+        board1.data.updatedAt,
+        board2.data.updatedAt,
+        board3.data.updatedAt,
+      ]),
+    [settingsUpdatedAt, board1.data.updatedAt, board2.data.updatedAt, board3.data.updatedAt]
+  );
+
+  const syncBundle = useMemo<SyncBundle>(
+    () => ({
+      tabLabels,
+      task1Titles,
+      task2Titles,
+      task3Titles,
+      task1Data: board1.data,
+      task2Data: board2.data,
+      task3Data: board3.data,
+      settingsUpdatedAt,
+      updatedAt: bundleUpdatedAt,
+    }),
+    [
+      tabLabels,
+      task1Titles,
+      task2Titles,
+      task3Titles,
+      board1.data,
+      board2.data,
+      board3.data,
+      settingsUpdatedAt,
+      bundleUpdatedAt,
+    ]
+  );
+
+  function applyRemoteBundle(remote: SyncBundle) {
+    const normalized = normalizeSyncBundle(remote);
+    setTabLabels(normalized.tabLabels);
+    setTask1Titles(normalized.task1Titles);
+    setTask2Titles(normalized.task2Titles);
+    setTask3Titles(normalized.task3Titles);
+    setSettingsUpdatedAt(normalized.settingsUpdatedAt);
+    board1.setData(normalized.task1Data);
+    board2.setData(normalized.task2Data);
+    board3.setData(normalized.task3Data);
+  }
+
+  const sync = useGistSync<SyncBundle>({ data: syncBundle, onRemoteData: applyRemoteBundle });
 
   return (
     <div className="app">
@@ -74,17 +156,6 @@ function App() {
           onSetProgress={board1.handleSetProgress}
           onAddTime={board1.handleAddTime}
           onResetAll={board1.handleResetAll}
-          syncSlot={
-            <SyncSettings
-              status={sync.status}
-              errorMessage={sync.errorMessage}
-              gistId={sync.gistId}
-              lastSyncedAt={sync.lastSyncedAt}
-              onConnect={sync.connect}
-              onDisconnect={sync.disconnect}
-              onManualSync={sync.manualSync}
-            />
-          }
         />
       )}
 
@@ -119,13 +190,24 @@ function App() {
       {activeTab === 'settings' && (
         <SettingsPanel
           labels={tabLabels}
-          onChange={setTabLabels}
+          onChange={updateTabLabels}
           task1Titles={task1Titles}
-          onTask1TitlesChange={setTask1Titles}
+          onTask1TitlesChange={updateTask1Titles}
           task2Titles={task2Titles}
-          onTask2TitlesChange={setTask2Titles}
+          onTask2TitlesChange={updateTask2Titles}
           task3Titles={task3Titles}
-          onTask3TitlesChange={setTask3Titles}
+          onTask3TitlesChange={updateTask3Titles}
+          syncSlot={
+            <SyncSettings
+              status={sync.status}
+              errorMessage={sync.errorMessage}
+              gistId={sync.gistId}
+              lastSyncedAt={sync.lastSyncedAt}
+              onConnect={sync.connect}
+              onDisconnect={sync.disconnect}
+              onManualSync={sync.manualSync}
+            />
+          }
         />
       )}
     </div>

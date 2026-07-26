@@ -32,8 +32,14 @@ export function useTaskBoard(storageKey: string, titles: readonly string[]): Tas
   );
 
   useEffect(() => {
-    setData((prev) => ({ ...sanitizeAppData(prev, titles), updatedAt: new Date().toISOString() }));
-    // titlesが変わるたびにタスク一覧をtitlesへ揃える
+    // titlesが変わるたびにタスク一覧をtitlesへ揃える。内容が実際には変わっていない場合
+    // （titlesの参照だけが変わった等）はupdatedAtを更新しない。無条件に更新すると、
+    // 同期の取り込み直後にも再びpushが走ってしまうため。
+    setData((prev) => {
+      const reconciled = sanitizeAppData(prev, titles);
+      const unchanged = JSON.stringify(reconciled.tasks) === JSON.stringify(prev.tasks);
+      return unchanged ? prev : { ...reconciled, updatedAt: new Date().toISOString() };
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [titles]);
 
