@@ -13,6 +13,7 @@ import {
   DEFAULT_TAB_LABELS,
   STORAGE_KEY,
   TAB_LABELS_KEY,
+  TASK1_STEPS_KEY,
   TASK2_STORAGE_KEY,
   TASK3_STORAGE_KEY,
   TASK2_STEPS_KEY,
@@ -36,18 +37,23 @@ function App() {
     'task1',
     sanitizeTabKey
   );
+  const [task1Titles, setTask1Titles] = useLocalStorage<string[]>(
+    TASK1_STEPS_KEY,
+    [...TASK_TITLES],
+    (raw) => sanitizeStepTitles(raw, [...TASK_TITLES])
+  );
   const [task2Titles, setTask2Titles] = useLocalStorage<string[]>(
     TASK2_STEPS_KEY,
     defaultStepTitles(),
-    sanitizeStepTitles
+    (raw) => sanitizeStepTitles(raw)
   );
   const [task3Titles, setTask3Titles] = useLocalStorage<string[]>(
     TASK3_STEPS_KEY,
     defaultStepTitles(),
-    sanitizeStepTitles
+    (raw) => sanitizeStepTitles(raw)
   );
 
-  const board1 = useTaskBoard(STORAGE_KEY, TASK_TITLES);
+  const board1 = useTaskBoard(STORAGE_KEY, task1Titles);
   const board2 = useTaskBoard(TASK2_STORAGE_KEY, task2Titles);
   const board3 = useTaskBoard(TASK3_STORAGE_KEY, task3Titles);
 
@@ -59,13 +65,7 @@ function App() {
 
       {activeTab === 'task1' && (
         <BoardView
-          heading={
-            <>
-              家族心理学会 自主シンポジウム
-              <br />
-              スライド作成進捗
-            </>
-          }
+          heading={tabLabels[0].trim() || DEFAULT_TAB_LABELS[0]}
           stats={board1.stats}
           todaySteps={board1.data.todaySteps}
           tasks={board1.data.tasks}
@@ -120,6 +120,8 @@ function App() {
         <SettingsPanel
           labels={tabLabels}
           onChange={setTabLabels}
+          task1Titles={task1Titles}
+          onTask1TitlesChange={setTask1Titles}
           task2Titles={task2Titles}
           onTask2TitlesChange={setTask2Titles}
           task3Titles={task3Titles}

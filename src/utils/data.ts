@@ -116,9 +116,9 @@ export function defaultStepTitles(count: number = DEFAULT_STEP_COUNT): string[] 
   return Array.from({ length: count }, (_, i) => `ステップ${i + 1}`);
 }
 
-export function sanitizeStepTitles(raw: unknown): string[] {
+export function sanitizeStepTitles(raw: unknown, fallback: string[] = defaultStepTitles()): string[] {
   if (!Array.isArray(raw) || raw.length < MIN_STEPS || raw.length > MAX_STEPS) {
-    return defaultStepTitles();
+    return fallback;
   }
-  return raw.map((v, i) => (typeof v === 'string' ? v : `ステップ${i + 1}`));
+  return raw.map((v, i) => (typeof v === 'string' ? v : (fallback[i] ?? `ステップ${i + 1}`)));
 }

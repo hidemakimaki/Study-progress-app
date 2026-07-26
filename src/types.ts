@@ -53,17 +53,18 @@ export type TabKey = 'task1' | 'task2' | 'task3' | 'settings';
 
 export type TabLabels = [string, string, string];
 
-export const DEFAULT_TAB_LABELS: TabLabels = ['Task1', 'Task2', 'Task3'];
+export const DEFAULT_TAB_LABELS: TabLabels = ['家族心理学会 自主シンポジウム', 'Task2', 'Task3'];
 
 export const TAB_LABELS_KEY = 'tabLabels';
 export const ACTIVE_TAB_KEY = 'activeTab';
 
-// ---------- Task2・Task3のステップ設定 ----------
+// ---------- Task1・Task2・Task3のステップ設定 ----------
 
 export const MIN_STEPS = 2;
 export const MAX_STEPS = 6;
 export const DEFAULT_STEP_COUNT = 2;
 
+export const TASK1_STEPS_KEY = 'task1StepTitles';
 export const TASK2_STORAGE_KEY = 'task2Data';
 export const TASK3_STORAGE_KEY = 'task3Data';
 export const TASK2_STEPS_KEY = 'task2StepTitles';
