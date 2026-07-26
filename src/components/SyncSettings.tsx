@@ -90,7 +90,7 @@ function SyncSettings({
                   <p className="sync-description">
                     トークンは
                     <a
-                      href="https://github.com/settings/tokens/new?scopes=gist&description=slide-progress-app"
+                      href="https://github.com/settings/tokens/new?scopes=gist&description=study-progress-app"
                       target="_blank"
                       rel="noreferrer"
                     >
