@@ -722,6 +722,23 @@ input {
   text-align: center;
 }
 
+.random-quote {
+  margin: 0 0 16px;
+  padding: 16px 20px;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  line-height: 1.7;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.random-quote:hover {
+  color: var(--color-accent-dark);
+}
+
 .btn-reset {
   background: #ffffff;
   color: var(--color-danger);

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { Task } from '../types';
 import OverallProgress from './OverallProgress';
 import TaskCard from './TaskCard';
+import RandomQuote from './RandomQuote';
 
 type BoardViewProps = {
   heading: ReactNode;
@@ -57,6 +58,7 @@ function BoardView({
       </main>
 
       <footer className="app-footer">
+        <RandomQuote />
         <button type="button" className="btn btn-reset" onClick={onResetAll}>
           すべての進捗をリセット
         </button>
