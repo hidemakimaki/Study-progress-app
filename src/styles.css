@@ -304,16 +304,59 @@ input {
   }
 }
 
-/* ---------- 作業時間の入力 ---------- */
+/* ---------- 作業時間の記録（タイマー／手動） ---------- */
+
+.time-entry-section {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.task-timer {
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.task-timer-label {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.task-timer-body {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.task-timer-clock {
+  min-width: 84px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--task-accent-dark, var(--color-accent-dark));
+}
+
+.task-timer-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.task-timer-buttons .btn {
+  min-height: 38px;
+  padding: 8px 16px;
+}
 
 .time-entry {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid var(--color-border);
 }
 
 .time-entry label {

@@ -4,6 +4,7 @@ import type { Task } from '../types';
 import { STAGE_LABELS, MAX_PROGRESS, TASK_COLORS } from '../types';
 import { formatMinutes, parseMinutesInput } from '../utils/time';
 import SegmentedBar from './SegmentedBar';
+import TaskTimer from './TaskTimer';
 
 type TaskCardProps = {
   task: Task;
@@ -75,6 +76,11 @@ function TaskCard({ task, onAdvance, onRetreat, onSetProgress, onAddTime }: Task
     }
   };
 
+  const handleTimerRecord = (minutes: number) => {
+    onAddTime(task.id, minutes);
+    setTimeMessage(`タイマーで計測した${minutes}分を段階${task.progress}に追加しました`);
+  };
+
   const taskColor = TASK_COLORS[task.id];
   const taskColorStyle = taskColor
     ? ({
@@ -137,22 +143,30 @@ function TaskCard({ task, onAdvance, onRetreat, onSetProgress, onAddTime }: Task
         </p>
       )}
 
-      <div className="time-entry">
-        <label htmlFor={`time-input-${task.id}`}>作業時間：</label>
-        <input
-          id={`time-input-${task.id}`}
-          type="text"
-          inputMode="numeric"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleInputKeyDown}
-          placeholder="30"
-          aria-label={`${task.title}の作業時間（分）を入力`}
+      <div className="time-entry-section">
+        <TaskTimer
+          taskId={task.id}
+          stageLabel={`段階${task.progress}（${STAGE_LABELS[task.progress]}）`}
+          onRecord={handleTimerRecord}
         />
-        <span className="time-entry-unit">分</span>
-        <button type="button" className="btn btn-outline" onClick={handleAddTime}>
-          時間を追加
-        </button>
+
+        <div className="time-entry">
+          <label htmlFor={`time-input-${task.id}`}>作業時間を手動で追加：</label>
+          <input
+            id={`time-input-${task.id}`}
+            type="text"
+            inputMode="numeric"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleInputKeyDown}
+            placeholder="30"
+            aria-label={`${task.title}の作業時間（分）を入力`}
+          />
+          <span className="time-entry-unit">分</span>
+          <button type="button" className="btn btn-outline" onClick={handleAddTime}>
+            時間を追加
+          </button>
+        </div>
       </div>
 
       {errorMessage && (
