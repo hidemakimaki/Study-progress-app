@@ -1,130 +1,131 @@
-import { useMemo } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useGistSync } from './hooks/useGistSync';
-import { createInitialData, ensureToday, sanitizeAppData } from './utils/data';
-import type { AppData } from './types';
-import { MAX_PROGRESS, STORAGE_KEY } from './types';
-import OverallProgress from './components/OverallProgress';
-import TaskCard from './components/TaskCard';
+import { useTaskBoard } from './hooks/useTaskBoard';
+import {
+  sanitizeTabKey,
+  sanitizeTabLabels,
+  sanitizeStepTitles,
+  defaultStepTitles,
+} from './utils/data';
+import type { TabKey, TabLabels } from './types';
+import {
+  ACTIVE_TAB_KEY,
+  DEFAULT_TAB_LABELS,
+  STORAGE_KEY,
+  TAB_LABELS_KEY,
+  TASK2_STORAGE_KEY,
+  TASK3_STORAGE_KEY,
+  TASK2_STEPS_KEY,
+  TASK3_STEPS_KEY,
+  TASK_TITLES,
+} from './types';
+import BoardView from './components/BoardView';
 import SyncSettings from './components/SyncSettings';
+import TabNav from './components/TabNav';
+import SettingsPanel from './components/SettingsPanel';
 import './styles.css';
 
 function App() {
-  const [data, setData] = useLocalStorage<AppData>(
-    STORAGE_KEY,
-    createInitialData(),
-    sanitizeAppData
+  const [tabLabels, setTabLabels] = useLocalStorage<TabLabels>(
+    TAB_LABELS_KEY,
+    DEFAULT_TAB_LABELS,
+    sanitizeTabLabels
+  );
+  const [activeTab, setActiveTab] = useLocalStorage<TabKey>(
+    ACTIVE_TAB_KEY,
+    'task1',
+    sanitizeTabKey
+  );
+  const [task2Titles, setTask2Titles] = useLocalStorage<string[]>(
+    TASK2_STEPS_KEY,
+    defaultStepTitles(),
+    sanitizeStepTitles
+  );
+  const [task3Titles, setTask3Titles] = useLocalStorage<string[]>(
+    TASK3_STEPS_KEY,
+    defaultStepTitles(),
+    sanitizeStepTitles
   );
 
-  /** updatedAtを必ず打刻してから保存する（端末間の同期でどちらが新しいか判定するため） */
-  function persist(next: AppData) {
-    setData({ ...next, updatedAt: new Date().toISOString() });
-  }
+  const board1 = useTaskBoard(STORAGE_KEY, TASK_TITLES);
+  const board2 = useTaskBoard(TASK2_STORAGE_KEY, task2Titles);
+  const board3 = useTaskBoard(TASK3_STORAGE_KEY, task3Titles);
 
-  const sync = useGistSync({ data, onRemoteData: setData });
-
-  const stats = useMemo(() => {
-    const totalTasks = data.tasks.length;
-    const completedCount = data.tasks.filter((t) => t.progress >= MAX_PROGRESS).length;
-    const progressSum = data.tasks.reduce((sum, t) => sum + t.progress, 0);
-    const overallPercent = Math.round((progressSum / (totalTasks * MAX_PROGRESS)) * 100);
-    const totalMinutes = data.tasks.reduce(
-      (sum, t) => sum + t.timeByStage.reduce((s, m) => s + m, 0),
-      0
-    );
-    return { totalTasks, completedCount, overallPercent, totalMinutes };
-  }, [data.tasks]);
-
-  /** 進捗をtargetProgressへ変更する。完成（5）へ新たに到達した場合はtrueを返す。 */
-  function setTaskProgress(taskId: number, targetProgress: number): boolean {
-    const cur = ensureToday(data);
-    const task = cur.tasks.find((t) => t.id === taskId);
-    if (!task) return false;
-
-    const clamped = Math.min(MAX_PROGRESS, Math.max(0, targetProgress));
-    if (clamped === task.progress) {
-      persist(cur);
-      return false;
-    }
-
-    const delta = clamped - task.progress;
-    const tasks = cur.tasks.map((t) => (t.id === taskId ? { ...t, progress: clamped } : t));
-    const todaySteps = delta > 0 ? cur.todaySteps + delta : cur.todaySteps;
-    persist({ ...cur, tasks, todaySteps });
-
-    return delta > 0 && clamped === MAX_PROGRESS;
-  }
-
-  function handleAdvance(taskId: number): boolean {
-    const task = data.tasks.find((t) => t.id === taskId);
-    if (!task) return false;
-    return setTaskProgress(taskId, task.progress + 1);
-  }
-
-  function handleRetreat(taskId: number) {
-    const task = data.tasks.find((t) => t.id === taskId);
-    if (!task) return;
-    setTaskProgress(taskId, task.progress - 1);
-  }
-
-  function handleSetProgress(taskId: number, stage: number): boolean {
-    return setTaskProgress(taskId, stage);
-  }
-
-  function handleAddTime(taskId: number, minutes: number) {
-    const cur = ensureToday(data);
-    const task = cur.tasks.find((t) => t.id === taskId);
-    if (!task) return;
-    const timeByStage = [...task.timeByStage] as typeof task.timeByStage;
-    timeByStage[task.progress] += minutes;
-    const tasks = cur.tasks.map((t) => (t.id === taskId ? { ...t, timeByStage } : t));
-    persist({ ...cur, tasks });
-  }
-
-  function handleResetAll() {
-    const confirmed = window.confirm('すべての進捗と作業時間をリセットします。よろしいですか？');
-    if (!confirmed) return;
-    persist(createInitialData());
-  }
+  const sync = useGistSync({ data: board1.data, onRemoteData: board1.setData });
 
   return (
     <div className="app">
-      <OverallProgress
-        completedCount={stats.completedCount}
-        totalTasks={stats.totalTasks}
-        overallPercent={stats.overallPercent}
-        totalMinutes={stats.totalMinutes}
-        todaySteps={data.todaySteps}
-      />
+      <TabNav labels={tabLabels} activeTab={activeTab} onSelect={setActiveTab} />
 
-      <main className="task-list">
-        {data.tasks.map((task) => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            onAdvance={handleAdvance}
-            onRetreat={handleRetreat}
-            onSetProgress={handleSetProgress}
-            onAddTime={handleAddTime}
-          />
-        ))}
-      </main>
+      {activeTab === 'task1' && (
+        <BoardView
+          heading={
+            <>
+              家族心理学会 自主シンポジウム
+              <br />
+              スライド作成進捗
+            </>
+          }
+          stats={board1.stats}
+          todaySteps={board1.data.todaySteps}
+          tasks={board1.data.tasks}
+          onAdvance={board1.handleAdvance}
+          onRetreat={board1.handleRetreat}
+          onSetProgress={board1.handleSetProgress}
+          onAddTime={board1.handleAddTime}
+          onResetAll={board1.handleResetAll}
+          syncSlot={
+            <SyncSettings
+              status={sync.status}
+              errorMessage={sync.errorMessage}
+              gistId={sync.gistId}
+              lastSyncedAt={sync.lastSyncedAt}
+              onConnect={sync.connect}
+              onDisconnect={sync.disconnect}
+              onManualSync={sync.manualSync}
+            />
+          }
+        />
+      )}
 
-      <SyncSettings
-        status={sync.status}
-        errorMessage={sync.errorMessage}
-        gistId={sync.gistId}
-        lastSyncedAt={sync.lastSyncedAt}
-        onConnect={sync.connect}
-        onDisconnect={sync.disconnect}
-        onManualSync={sync.manualSync}
-      />
+      {activeTab === 'task2' && (
+        <BoardView
+          heading={tabLabels[1].trim() || DEFAULT_TAB_LABELS[1]}
+          stats={board2.stats}
+          todaySteps={board2.data.todaySteps}
+          tasks={board2.data.tasks}
+          onAdvance={board2.handleAdvance}
+          onRetreat={board2.handleRetreat}
+          onSetProgress={board2.handleSetProgress}
+          onAddTime={board2.handleAddTime}
+          onResetAll={board2.handleResetAll}
+        />
+      )}
 
-      <footer className="app-footer">
-        <button type="button" className="btn btn-reset" onClick={handleResetAll}>
-          すべての進捗をリセット
-        </button>
-      </footer>
+      {activeTab === 'task3' && (
+        <BoardView
+          heading={tabLabels[2].trim() || DEFAULT_TAB_LABELS[2]}
+          stats={board3.stats}
+          todaySteps={board3.data.todaySteps}
+          tasks={board3.data.tasks}
+          onAdvance={board3.handleAdvance}
+          onRetreat={board3.handleRetreat}
+          onSetProgress={board3.handleSetProgress}
+          onAddTime={board3.handleAddTime}
+          onResetAll={board3.handleResetAll}
+        />
+      )}
+
+      {activeTab === 'settings' && (
+        <SettingsPanel
+          labels={tabLabels}
+          onChange={setTabLabels}
+          task2Titles={task2Titles}
+          onTask2TitlesChange={setTask2Titles}
+          task3Titles={task3Titles}
+          onTask3TitlesChange={setTask3Titles}
+        />
+      )}
     </div>
   );
 }

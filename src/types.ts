@@ -31,13 +31,14 @@ export const TASK_TITLES = [
   '全体を推敲する',
 ] as const;
 
-// タスクごとのメインカラー（識別用）。1・2は青系、3はアクア、4・5は赤系でグルーピング。
+// ステップごとのメインカラー（識別用）。1・2は青系、3はアクア、4・5は赤系でグルーピング。
 export const TASK_COLORS: Record<number, { base: string; dark: string; bg: string }> = {
   1: { base: '#2a78d6', dark: '#1b4d8a', bg: '#dde9f8' }, // blue（明るい青）
   2: { base: '#1e4d8f', dark: '#0e2443', bg: '#dbe3ed' }, // navy（濃い青）
   3: { base: '#1baf7a', dark: '#0f5f43', bg: '#dbf2ea' }, // aqua（変更なし）
   4: { base: '#d9482a', dark: '#8e2d19', bg: '#f9e2dd' }, // red-orange（明るい赤）
   5: { base: '#b3261e', dark: '#641511', bg: '#f3dcdb' }, // deep red（濃い赤）
+  6: { base: '#4a3aa7', dark: '#332872', bg: '#e2dff1' }, // violet（Task2/3で6ステップ目に使用）
 };
 
 export const MAX_PROGRESS = 5;
@@ -45,3 +46,25 @@ export const STORAGE_KEY = 'slideProgressData';
 export const GIST_FILENAME = 'slide-progress-data.json';
 export const GIST_TOKEN_KEY = 'githubSyncToken';
 export const GIST_ID_KEY = 'githubSyncGistId';
+
+// ---------- タブ ----------
+
+export type TabKey = 'task1' | 'task2' | 'task3' | 'settings';
+
+export type TabLabels = [string, string, string];
+
+export const DEFAULT_TAB_LABELS: TabLabels = ['Task1', 'Task2', 'Task3'];
+
+export const TAB_LABELS_KEY = 'tabLabels';
+export const ACTIVE_TAB_KEY = 'activeTab';
+
+// ---------- Task2・Task3のステップ設定 ----------
+
+export const MIN_STEPS = 2;
+export const MAX_STEPS = 6;
+export const DEFAULT_STEP_COUNT = 2;
+
+export const TASK2_STORAGE_KEY = 'task2Data';
+export const TASK3_STORAGE_KEY = 'task3Data';
+export const TASK2_STEPS_KEY = 'task2StepTitles';
+export const TASK3_STEPS_KEY = 'task3StepTitles';

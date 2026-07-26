@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react';
 import SegmentedBar from './SegmentedBar';
 import { formatMinutes } from '../utils/time';
 
 type OverallProgressProps = {
+  heading: ReactNode;
   completedCount: number;
   totalTasks: number;
   overallPercent: number;
@@ -12,6 +14,7 @@ type OverallProgressProps = {
 const OVERALL_SEGMENTS = 10;
 
 function OverallProgress({
+  heading,
   completedCount,
   totalTasks,
   overallPercent,
@@ -22,11 +25,7 @@ function OverallProgress({
 
   return (
     <header className="overall-progress">
-      <h1>
-        家族心理学会 自主シンポジウム
-        <br />
-        スライド作成進捗
-      </h1>
+      <h1>{heading}</h1>
 
       <div className="overall-stats">
         <div className="stat">

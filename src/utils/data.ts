@@ -1,5 +1,5 @@
-import type { AppData, Task, TimeByStage } from '../types';
-import { TASK_TITLES, MAX_PROGRESS } from '../types';
+import type { AppData, Task, TabKey, TabLabels, TimeByStage } from '../types';
+import { TASK_TITLES, MAX_PROGRESS, DEFAULT_TAB_LABELS, MIN_STEPS, MAX_STEPS, DEFAULT_STEP_COUNT } from '../types';
 
 export function todayString(): string {
   const now = new Date();
@@ -13,8 +13,8 @@ function createEmptyTimeByStage(): TimeByStage {
   return [0, 0, 0, 0, 0, 0];
 }
 
-export function createInitialTasks(): Task[] {
-  return TASK_TITLES.map((title, index) => ({
+export function createInitialTasks(titles: readonly string[] = TASK_TITLES): Task[] {
+  return titles.map((title, index) => ({
     id: index + 1,
     title,
     progress: 0,
@@ -22,9 +22,9 @@ export function createInitialTasks(): Task[] {
   }));
 }
 
-export function createInitialData(): AppData {
+export function createInitialData(titles: readonly string[] = TASK_TITLES): AppData {
   return {
-    tasks: createInitialTasks(),
+    tasks: createInitialTasks(titles),
     todaySteps: 0,
     lastActiveDate: todayString(),
     updatedAt: new Date().toISOString(),
@@ -48,15 +48,16 @@ function sanitizeTimeByStage(value: unknown): TimeByStage {
 
 /**
  * localStorageから読み込んだ生データを検証し、壊れている・古い形式（作業時間情報なし）
- * であっても安全に初期値で補いながらAppDataを組み立てる。
+ * や、titlesの数・内容が変わった場合（Task2/Task3のステップ設定変更）であっても、
+ * 既存の進捗・作業時間をidで突き合わせながら安全にAppDataを組み立てる。
  */
-export function sanitizeAppData(raw: unknown): AppData {
-  const fallback = createInitialData();
+export function sanitizeAppData(raw: unknown, titles: readonly string[] = TASK_TITLES): AppData {
+  const fallback = createInitialData(titles);
   if (typeof raw !== 'object' || raw === null) return fallback;
   const obj = raw as Record<string, unknown>;
 
   const rawTasks = Array.isArray(obj.tasks) ? obj.tasks : [];
-  const tasks: Task[] = TASK_TITLES.map((title, index) => {
+  const tasks: Task[] = titles.map((title, index) => {
     const id = index + 1;
     const found = rawTasks.find(
       (t): t is Record<string, unknown> =>
@@ -96,4 +97,28 @@ export function ensureToday(data: AppData): AppData {
   const today = todayString();
   if (data.lastActiveDate === today) return data;
   return { ...data, todaySteps: 0, lastActiveDate: today };
+}
+
+export function sanitizeTabLabels(raw: unknown): TabLabels {
+  if (!Array.isArray(raw) || raw.length !== 3) return DEFAULT_TAB_LABELS;
+  return raw.map((v, i) => (typeof v === 'string' ? v : DEFAULT_TAB_LABELS[i])) as TabLabels;
+}
+
+const VALID_TAB_KEYS: TabKey[] = ['task1', 'task2', 'task3', 'settings'];
+
+export function sanitizeTabKey(raw: unknown): TabKey {
+  return typeof raw === 'string' && VALID_TAB_KEYS.includes(raw as TabKey)
+    ? (raw as TabKey)
+    : 'task1';
+}
+
+export function defaultStepTitles(count: number = DEFAULT_STEP_COUNT): string[] {
+  return Array.from({ length: count }, (_, i) => `ステップ${i + 1}`);
+}
+
+export function sanitizeStepTitles(raw: unknown): string[] {
+  if (!Array.isArray(raw) || raw.length < MIN_STEPS || raw.length > MAX_STEPS) {
+    return defaultStepTitles();
+  }
+  return raw.map((v, i) => (typeof v === 'string' ? v : `ステップ${i + 1}`));
 }
